@@ -1,0 +1,26 @@
+# Bots served by the sample application, see SampleApplication.
+# To run against Telegram, provide real bots, e.g. in a git-ignored application-local.yml:
+#
+# sample:
+#   bots:
+#     - username: my_bot
+#       token: "<token from @BotFather>"
+sample:
+  bots: []
+
+---
+# Local run without Telegram: gradle :examples:telegram-boot-sample-app:bootRun --args='--spring.profiles.active=emulator'
+# Bots talk to the embedded Telegram emulator, chat with them at http://localhost:18790
+spring:
+  config:
+    activate:
+      on-profile: emulator
+telegram-boot:
+  emulator:
+    enabled: true
+sample:
+  bots:
+    - username: sample_bot
+      token: "1001:sample"
+    - username: second_sample_bot
+      token: "1002:second-sample"

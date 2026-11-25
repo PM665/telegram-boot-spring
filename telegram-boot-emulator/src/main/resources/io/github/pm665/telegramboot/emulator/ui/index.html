@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telegram emulator</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="app">
+  <header class="toolbar">
+    <strong class="title">Telegram emulator</strong>
+    <label>User ID <input id="user-id" type="number" min="1" placeholder="4242" required></label>
+    <label>Username <input id="username" type="text" placeholder="optional"></label>
+    <label>Bot
+      <select id="bot"></select>
+      <span id="bot-status" class="status-dot" title="offline"></span>
+    </label>
+  </header>
+
+  <section id="chat" class="chat" aria-live="polite">
+    <div id="placeholder" class="placeholder"></div>
+    <div id="history" class="history"></div>
+  </section>
+
+  <form id="composer" class="composer">
+    <input id="text" type="text" placeholder="Message" autocomplete="off" disabled>
+    <button id="send" type="submit" disabled>Send</button>
+  </form>
+  <div id="error" class="error" role="alert" hidden></div>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

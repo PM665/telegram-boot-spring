@@ -1,0 +1,19 @@
+package io.github.pm665.telegramboot.drivers.bot
+
+import io.github.pm665.telegramboot.domain.bot.BotUpdate
+import io.github.pm665.telegramboot.events.SendAdminMessageEvent
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+
+class BotErrorEventListenerTest {
+    @Test
+    fun `sends park bot name with unhandled error through admin bot`() {
+        val events = mutableListOf<SendAdminMessageEvent>()
+        val listener =
+            BotErrorEventListener { events += it as SendAdminMessageEvent }
+
+        listener.onBotError(BotErrorEventListener.BotErrorEvent("alpha_bot", BotUpdate(), IllegalStateException("secret")))
+
+        assertThat(events).containsExactly(SendAdminMessageEvent("Unhandled error in fleet bot @alpha_bot: IllegalStateException", emptyList(), null))
+    }
+}

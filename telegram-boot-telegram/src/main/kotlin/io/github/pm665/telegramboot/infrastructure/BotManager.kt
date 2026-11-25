@@ -1,0 +1,58 @@
+package io.github.pm665.telegramboot.infrastructure
+
+import io.github.pm665.telegramboot.domain.bot.BotPlatform
+import io.github.pm665.telegramboot.drivers.telegram.BotsFactory
+import io.github.pm665.telegramboot.drivers.telegram.OperatorBot
+import io.github.pm665.telegramboot.features.messaging.TelegramMessageSender
+import io.github.pm665.telegramboot.ports.BotLifecycleDriver
+import io.github.pm665.telegramboot.ports.BotsService.Bot
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication
+import org.telegram.telegrambots.longpolling.util.DefaultGetUpdatesGenerator
+import org.telegram.telegrambots.meta.TelegramUrl
+import org.telegram.telegrambots.meta.api.methods.GetMe
+import org.telegram.telegrambots.meta.api.objects.User
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException
+
+@Service
+class BotManager(
+    private val application: TelegramBotsLongPollingApplication,
+    private val botsFactory: BotsFactory,
+    private val messageSender: TelegramMessageSender,
+    private val telegramApiUrl: TelegramUrl,
+) : BotLifecycleDriver {
+    private val log = LoggerFactory.getLogger(BotManager::class.java)
+    override val platform = BotPlatform.TELEGRAM
+
+    override fun startBot(bot: Bot) {
+        require(bot.platform == platform) { "Cannot start ${bot.platform} bot with Telegram manager" }
+        log.info("Starting bot {}", bot.botUsername)
+        val botBean = botsFactory.getClient(bot.botUsername)
+        verifyIdentity(botBean, bot)
+        val botSession = application.registerBot(bot.token, { telegramApiUrl }, DefaultGetUpdatesGenerator(), botBean.updatesConsumer)
+        botBean.afterRegistration(botSession)
+        messageSender.sendCommands(bot.botUsername, mapOf("start" to "start.command"))
+    }
+
+    private fun verifyIdentity(
+        botBean: OperatorBot,
+        bot: Bot,
+    ) {
+        val me: User? = botBean.execute(GetMe())
+        val actualUsername = me?.userName
+        if (!actualUsername.equals(bot.botUsername.removePrefix("@"), ignoreCase = true)) {
+            log.warn("Telegram reports username {} for the token of bot {}", actualUsername, bot.botUsername)
+        }
+    }
+
+    override fun stopBot(bot: Bot) {
+        require(bot.platform == platform) { "Cannot stop ${bot.platform} bot with Telegram manager" }
+        try {
+            log.info("Stopping bot {}", bot.botUsername)
+            application.unregisterBot(bot.token)
+        } catch (e: TelegramApiException) {
+            log.warn("Unsuccessful attempt to stop bot {}: {}", bot.botUsername, e.message)
+        }
+    }
+}

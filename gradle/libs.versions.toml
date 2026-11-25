@@ -1,0 +1,28 @@
+[versions]
+# Build
+kotlin = "2.4.10"
+ktlint = "1.8.0"
+springBoot = "4.1.0"
+spotless = "8.10.3"
+
+# Libraries not managed by the Spring BOMs
+telegram-bots = "10.2.0"
+mockito-kotlin = "6.4.0"
+
+[libraries]
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
+telegrambots-longpolling = { group = "org.telegram", name = "telegrambots-longpolling", version.ref = "telegram-bots" }
+telegrambots-client = { group = "org.telegram", name = "telegrambots-client", version.ref = "telegram-bots" }
+telegrambots-meta = { group = "org.telegram", name = "telegrambots-meta", version.ref = "telegram-bots" }
+micrometer-core = { module = "io.micrometer:micrometer-core" }
+micrometer-observation = { module = "io.micrometer:micrometer-observation" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+
+[bundles]
+telegram = ["telegrambots-longpolling", "telegrambots-client"]
+observability = ["micrometer-core", "micrometer-observation"]
